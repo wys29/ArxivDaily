@@ -15,7 +15,7 @@ from github_issue import make_github_issue
 # os.environ["http_proxy"] = "http://127.0.0.1:8118"
 # os.environ["https_proxy"] = "http://127.0.0.1:8118"
 
-from config import OPENAI_API_KEYS, KEYWORD_LIST, LANGUAGE
+from config import OPENAI_API_KEYS, DEEPSEEK_API_KEY, KEYWORD_LIST, LANGUAGE
 
 from datetime import datetime, timedelta
 import pytz
@@ -274,9 +274,17 @@ class Reader:
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
     def chat_conclusion(self, text, conclusion_prompt_token = 800):
-        openai.api_key = self.chat_api_list[self.cur_api]
-        self.cur_api += 1
-        self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+        # 优先使用DeepSeek API（如果配置了的话）
+        if DEEPSEEK_API_KEY:
+            openai.api_key = DEEPSEEK_API_KEY
+            openai.api_base = "https://api.deepseek.com/v1"
+            model_name = "deepseek-chat"
+        else:
+            openai.api_key = self.chat_api_list[self.cur_api]
+            self.cur_api += 1
+            self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+            model_name = "gpt-3.5-turbo"
+            
         text_token = len(self.encoding.encode(text))
         clip_text_index = int(len(text)*(self.max_token_num-conclusion_prompt_token)/text_token)
         clip_text = text[:clip_text_index]   
@@ -298,7 +306,7 @@ class Reader:
                  """.format(self.language, self.language)},
             ]
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=model_name,
             # prompt需要用英语替换，少占用token。
             messages=messages,
         )
@@ -316,9 +324,17 @@ class Reader:
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
     def chat_method(self, text, method_prompt_token = 800):
-        openai.api_key = self.chat_api_list[self.cur_api]
-        self.cur_api += 1
-        self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+        # 优先使用DeepSeek API（如果配置了的话）
+        if DEEPSEEK_API_KEY:
+            openai.api_key = DEEPSEEK_API_KEY
+            openai.api_base = "https://api.deepseek.com/v1"
+            model_name = "deepseek-chat"
+        else:
+            openai.api_key = self.chat_api_list[self.cur_api]
+            self.cur_api += 1
+            self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+            model_name = "gpt-3.5-turbo"
+            
         text_token = len(self.encoding.encode(text))
         clip_text_index = int(len(text)*(self.max_token_num-method_prompt_token)/text_token)
         clip_text = text[:clip_text_index]        
@@ -342,7 +358,7 @@ class Reader:
                  """.format(self.language, self.language)},
             ]
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=model_name,
             messages=messages,
         )
         result = ''
@@ -359,9 +375,17 @@ class Reader:
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
     def chat_summary(self, text, summary_prompt_token = 1100):
-        openai.api_key = self.chat_api_list[self.cur_api]
-        self.cur_api += 1
-        self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+        # 优先使用DeepSeek API（如果配置了的话）
+        if DEEPSEEK_API_KEY:
+            openai.api_key = DEEPSEEK_API_KEY
+            openai.api_base = "https://api.deepseek.com/v1"
+            model_name = "deepseek-chat"
+        else:
+            openai.api_key = self.chat_api_list[self.cur_api]
+            self.cur_api += 1
+            self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+            model_name = "gpt-3.5-turbo"
+            
         text_token = len(self.encoding.encode(text))
         clip_text_index = int(len(text)*(self.max_token_num-summary_prompt_token)/text_token)
         clip_text = text[:clip_text_index]
@@ -388,7 +412,7 @@ class Reader:
             ]
                 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=model_name,
             messages=messages,
         )
         result = ''
@@ -509,4 +533,3 @@ if __name__ == '__main__':
     start_time = time.time()
     main(args=args)    
     print("summary time:", time.time() - start_time)
-    
