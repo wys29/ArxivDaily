@@ -16,7 +16,7 @@ REPO_NAME = 'ArxivDaily'
 NEW_SUB_URL = 'https://arxiv.org/list/cs/new'
 
 # Keywords to search
-KEYWORD_LIST = ["origami", ]
+KEYWORD_LIST = ["diffusion", ]
 
 
 OPENAI_API_KEYS = ['', ]
